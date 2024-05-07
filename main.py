@@ -22,7 +22,7 @@ class Player(pg.sprite.Sprite):
                 self.rect.x -= speed
             if key[pg.K_RIGHT] and self.rect.right < screen.get_width() - 50:
                 self.rect.x += speed
-            if key[pg.K_SPACE] and len(bullet_group) == 0:
+            if (key[pg.K_SPACE] or key[pg.K_UP]) and len(bullet_group) == 0:
                 bullet = Bullet(self.rect.centerx, self.rect.top)
                 bullet_group.add(bullet)
 
@@ -124,8 +124,8 @@ class Obstacle(pg.sprite.Sprite):
 
 
 def create_aliens():
-    for row in range(4, 5):
-        for col in range(1):
+    for row in range(5):
+        for col in range(11):
             if row == 0:
                 kind = 0
             elif row == 1 or row == 2:
@@ -179,13 +179,13 @@ def draw_ui():
         text = f1.render(str(best), True, (255, 255, 0))
         screen.blit(text, (460, 25))
 
-
     if player.isKilled and player.hp == 0:
         f = open('record.txt', "w")
         if score > best:
             f.write(str(score))
         else:
             f.write(str(best))
+        f.close()
         f1 = pg.font.Font('fonts/PIXY.ttf', 120)
         text = f1.render('GAME OVER', True, (255, 255, 255))
         rect = text.get_rect()
