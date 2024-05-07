@@ -2,8 +2,6 @@ import random
 import time
 
 import pygame as pg
-import pygame.sprite
-from pygame.locals import *
 
 
 class Player(pg.sprite.Sprite):
@@ -21,9 +19,9 @@ class Player(pg.sprite.Sprite):
 
         if self.isCanControl:
             key = pg.key.get_pressed()
-            if key[pg.K_LEFT] and self.rect.left > 0:
+            if key[pg.K_LEFT] and self.rect.left > 50:
                 self.rect.x -= speed
-            if key[pg.K_RIGHT] and self.rect.right < screen.get_width():
+            if key[pg.K_RIGHT] and self.rect.right < screen.get_width() - 50:
                 self.rect.x += speed
             if key[pg.K_SPACE] and len(bullet_group) == 0:
                 bullet = Bullet(self.rect.centerx, self.rect.top)
@@ -43,6 +41,41 @@ class Player(pg.sprite.Sprite):
             if self.hp == 0:
                 alien_group.empty()
                 self.isCanControl = False
+
+
+class Alien(pg.sprite.Sprite):
+    def __init__(self, x, y, kind):
+        pg.sprite.Sprite.__init__(self)
+        self.kind = kind
+        self.anim = 1
+        self.image = pg.image.load(f"sprites/alien_{self.kind}_{self.anim}.png")
+        self.rect = self.image.get_rect()
+        self.rect.center = [x, y]
+        self.count = 0
+        self.dir = 15
+
+    def update(self):
+        global score
+        self.count += self.dir // abs(self.dir)
+        if abs(self.count) >= 420:
+            self.dir *= -1
+            self.rect.y += 20
+
+        elif self.count % 42 == 0:
+            self.rect.x += self.dir
+            self.anim *= -1
+            self.image = pg.image.load(f"sprites/alien_{self.kind}_{self.anim}.png")
+
+        if pg.sprite.spritecollide(self, bullet_group, True):
+            score += 10 + 10 * (2 - self.kind)
+            self.kill()
+
+        if self.rect.bottom > player.rect.top:
+            player.image = pg.image.load("sprites/player_death.png")
+            alien_group.empty()
+            player.isKilled = True
+            player.isCanControl = False
+            player.hp = 0
 
 
 class Bullet(pg.sprite.Sprite):
@@ -74,32 +107,22 @@ class AlienBullet(pg.sprite.Sprite):
             self.kill()
 
 
-class Alien(pg.sprite.Sprite):
-    def __init__(self, x, y, kind):
-        pg.sprite.Sprite.__init__(self)
-        self.kind = kind
-        self.anim = 1
-        self.image = pg.image.load(f"sprites/alien_{self.kind}_{self.anim}.png")
+class Obstacle(pg.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.image = pg.image.load(f"sprites/obstacle_4.png")
         self.rect = self.image.get_rect()
-        self.rect.center = [x, y]
-        self.count = 0
-        self.dir = 15
+        self.rect.center = (x, y)
+
+        self.hp = 4
 
     def update(self):
-        global score
-        self.count += self.dir // abs(self.dir)
-        if abs(self.count) >= 420:
-            self.dir *= -1
-            self.rect.y += 20
-
-        elif self.count % 42 == 0:
-            self.rect.x += self.dir
-            self.anim *= -1
-            self.image = pg.image.load(f"sprites/alien_{self.kind}_{self.anim}.png")
-
-        if pg.sprite.spritecollide(self, bullet_group, True):
-            score += 10 + 10 * (2 - self.kind)
-            self.kill()
+        if pg.sprite.spritecollide(self, bullet_group, True) or pg.sprite.spritecollide(self, alien_bullet_group, True):
+            self.hp -= 1
+            if self.hp == 0:
+                self.kill()
+                return
+            self.image = pg.image.load(f"sprites/obstacle_{self.hp}.png")
 
 
 def create_aliens():
@@ -114,6 +137,23 @@ def create_aliens():
 
             alien = Alien(240 + col * 80, 100 + row * 70, kind)
             alien_group.add(alien)
+
+
+def create_obstacles():
+    for i in range(5):
+        x = 120 + 244 * i
+        y = 700
+
+        ob1 = Obstacle(x, y)
+        ob2 = Obstacle(x, y - 30)
+        ob3 = Obstacle(x + 30, y - 30)
+        ob4 = Obstacle(x + 60, y - 30)
+        ob5 = Obstacle(x + 60, y)
+        obstacles_group.add(ob1)
+        obstacles_group.add(ob2)
+        obstacles_group.add(ob3)
+        obstacles_group.add(ob4)
+        obstacles_group.add(ob5)
 
 
 def alien_shooting(count, aliens):
@@ -152,6 +192,23 @@ def draw_ui():
         screen.blit(image, (930 + 100 * i, 23))
 
 
+def update_and_draw_groups():
+    player.update()
+    bullet_group.update()
+    alien_group.update()
+    alien_bullet_group.update()
+    obstacles_group.update()
+
+    if len(alien_group) == 0:
+        player.isCanControl = False
+
+    player_group.draw(screen)
+    bullet_group.draw(screen)
+    alien_group.draw(screen)
+    alien_bullet_group.draw(screen)
+    obstacles_group.draw(screen)
+
+
 if __name__ == '__main__':
     pg.init()
     size = 1280, 800
@@ -165,9 +222,12 @@ if __name__ == '__main__':
     bullet_group = pg.sprite.Group()
     alien_group = pg.sprite.Group()
     alien_bullet_group = pg.sprite.Group()
+    obstacles_group = pg.sprite.Group()
+
 
     player_group.add(player)
     create_aliens()
+    create_obstacles()
 
     shooting_count = 0
     score = 0
@@ -182,18 +242,7 @@ if __name__ == '__main__':
         alien_shooting(shooting_count // 300, alien_group)
         shooting_count += 1
 
-        player.update()
-        bullet_group.update()
-        alien_group.update()
-        alien_bullet_group.update()
-
-        if len(alien_group) == 0:
-            player.isCanControl = False
-
-        player_group.draw(screen)
-        bullet_group.draw(screen)
-        alien_group.draw(screen)
-        alien_bullet_group.draw(screen)
+        update_and_draw_groups()
 
         draw_ui()
 
