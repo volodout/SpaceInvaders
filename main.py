@@ -12,12 +12,11 @@ class Player(pg.sprite.Sprite):
         self.rect.center = (x, y)
         self.hp = 3
         self.isKilled = False
-        self.isCanControl = True
 
     def update(self):
         speed = 7
 
-        if self.isCanControl:
+        if not self.isKilled:
             key = pg.key.get_pressed()
             if key[pg.K_LEFT] and self.rect.left > 50:
                 self.rect.x -= speed
@@ -40,7 +39,7 @@ class Player(pg.sprite.Sprite):
             self.isKilled = True
             if self.hp == 0:
                 alien_group.empty()
-                self.isCanControl = False
+                self.isKilled = True
 
 
 class Alien(pg.sprite.Sprite):
@@ -74,7 +73,6 @@ class Alien(pg.sprite.Sprite):
             player.image = pg.image.load("sprites/player_death.png")
             alien_group.empty()
             player.isKilled = True
-            player.isCanControl = False
             player.hp = 0
 
 
@@ -126,8 +124,8 @@ class Obstacle(pg.sprite.Sprite):
 
 
 def create_aliens():
-    for row in range(5):
-        for col in range(11):
+    for row in range(4, 5):
+        for col in range(1):
             if row == 0:
                 kind = 0
             elif row == 1 or row == 2:
@@ -165,23 +163,36 @@ def alien_shooting(count, aliens):
 
 def draw_ui():
     f1 = pg.font.Font('fonts/PIXY.ttf', 40)
+
     text = f1.render('SCORE', True, (255, 255, 255))
     screen.blit(text, (50, 25))
-
     text = f1.render(str(score), True, (31, 209, 37))
     screen.blit(text, (185, 25))
 
-    if not player.isCanControl:
-        f1 = pg.font.Font('fonts/PIXY.ttf', 120)
-        if player.isKilled:
-            s = 'GAME OVER'
+    f = open('record.txt')
+    best = int(f.readline())
+    f.close()
+
+    if best > 0:
+        text = f1.render('BEST', True, (255, 255, 0))
+        screen.blit(text, (350, 25))
+        text = f1.render(str(best), True, (255, 255, 0))
+        screen.blit(text, (460, 25))
+
+
+    if player.isKilled and player.hp == 0:
+        f = open('record.txt', "w")
+        if score > best:
+            f.write(str(score))
         else:
-            s = 'YOU WIN!'
-        text = f1.render(s, True, (255, 255, 255))
+            f.write(str(best))
+        f1 = pg.font.Font('fonts/PIXY.ttf', 120)
+        text = f1.render('GAME OVER', True, (255, 255, 255))
         rect = text.get_rect()
         rect.center = (screen.get_width() / 2, screen.get_height() / 2)
         screen.blit(text, rect.topleft)
         alien_bullet_group.empty()
+        alien_group.empty()
         return
 
     text = f1.render('LIVES', True, (255, 255, 255))
@@ -199,8 +210,9 @@ def update_and_draw_groups():
     alien_bullet_group.update()
     obstacles_group.update()
 
-    if len(alien_group) == 0:
-        player.isCanControl = False
+    if len(alien_group) == 0 and not player.isKilled:
+        create_aliens()
+        player.hp = min(player.hp + 1, 3)
 
     player_group.draw(screen)
     bullet_group.draw(screen)
@@ -223,7 +235,6 @@ if __name__ == '__main__':
     alien_group = pg.sprite.Group()
     alien_bullet_group = pg.sprite.Group()
     obstacles_group = pg.sprite.Group()
-
 
     player_group.add(player)
     create_aliens()
