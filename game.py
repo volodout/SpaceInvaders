@@ -2,7 +2,7 @@ from help_funcs import *
 import globals
 
 
-def begin(paused=False):
+def begin(paused=False, testing=False):
     if not paused:
         obstacles_group.empty()
         create_aliens()
@@ -23,7 +23,7 @@ def begin(paused=False):
 
         screen.fill('black')
 
-        alien_shooting(shooting_count // 300, alien_group)
+        alien_shooting(shooting_count // 300)
         shooting_count += 1
 
         update_and_draw_groups()
@@ -34,8 +34,11 @@ def begin(paused=False):
 
         clock.tick(60)
 
+        if testing:
+            running = False
 
-def pause():
+
+def pause(testing=False):
     paused = True
     while paused:
         for event in pg.event.get():
@@ -55,8 +58,11 @@ def pause():
         pg.display.update()
         clock.tick(60)
 
+        if testing:
+            paused = False
 
-def menu():
+
+def menu(testing=False):
     colors = ['white', 'white', 'white']
     colors[globals.level] = 'green'
 
@@ -75,7 +81,6 @@ def menu():
                     globals.level = min(2, globals.level + 1)
                 colors = ['white', 'white', 'white']
                 colors[globals.level] = 'green'
-                print(globals.level)
 
         screen.fill('black')
         print_text_to_center('SPACE', 150, 80, (0, 255, 0))
@@ -88,8 +93,15 @@ def menu():
         pg.display.update()
         clock.tick(60)
 
+        if testing:
+            show = False
 
-def game_over():
+
+def game_over(testing=False):
+    globals.player.image = pg.image.load("sprites/player_death.png")
+    globals.player.isKilled = True
+    globals.player.hp = 0
+
     alien_bullet_group.empty()
     alien_group.empty()
     bullet_group.empty()
@@ -113,3 +125,6 @@ def game_over():
 
         pg.display.update()
         clock.tick(60)
+
+        if testing:
+            show = False

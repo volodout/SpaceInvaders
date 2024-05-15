@@ -19,7 +19,6 @@ class Alien(pg.sprite.Sprite):
         if abs(self.count) >= self.delay * 10:
             self.dir *= -1
             self.rect.y += 20
-            print(self.delay)
 
         elif self.count % self.delay == 0:
             self.rect.x += self.dir

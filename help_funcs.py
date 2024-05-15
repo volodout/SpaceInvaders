@@ -48,8 +48,10 @@ def create_obstacles():
         obstacles_group.add(ob5)
 
 
-def alien_shooting(count, aliens):
-    if len(aliens) > 0 and random.randint(min(count, 70), 100) == 100:
+def alien_shooting(count, n=-1):
+    if n == -1:
+        n = random.randint(min(count, 70), 100)
+    if len(alien_group) > 0 and n == 100:
         alien = random.choice(alien_group.sprites())
         alien_bullet = AlienBullet(alien.rect.centerx, alien.rect.bottom, alien.kind)
         alien_bullet_group.add(alien_bullet)
@@ -108,7 +110,6 @@ def check_records():
         for i in range(3):
             f.write(str(bests[i]) + '\n')
         f.close()
-
 
 
 def update_and_draw_groups():
