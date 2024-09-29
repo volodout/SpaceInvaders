@@ -1,5 +1,8 @@
+import pygame.time
+
 from Bullet import Bullet
 from groups import *
+import globals
 
 
 class Player(pg.sprite.Sprite):
@@ -12,17 +15,17 @@ class Player(pg.sprite.Sprite):
         self.isKilled = False
 
     def update(self):
-        speed = 7
-
         if not self.isKilled:
             key = pg.key.get_pressed()
             if key[pg.K_LEFT] and self.rect.left > 50:
-                self.rect.x -= speed
+                self.rect.x -= globals.player_speed
             if key[pg.K_RIGHT] and self.rect.right < screen.get_width() - 50:
-                self.rect.x += speed
-            if (key[pg.K_SPACE] or key[pg.K_UP]) and len(bullet_group) == 0:
-                bullet = Bullet(self.rect.centerx, self.rect.top)
-                bullet_group.add(bullet)
+                self.rect.x += globals.player_speed
+            if (key[pg.K_SPACE] or key[pg.K_UP]) and len(bullet_group) <= globals.bullets_count - 1:
+                if pygame.time.get_ticks() - globals.ticks > 50 * globals.bullets_count:
+                    globals.ticks = pygame.time.get_ticks()
+                    bullet = Bullet(self.rect.centerx, self.rect.top)
+                    bullet_group.add(bullet)
 
         if self.isKilled and self.hp > 0:
             pg.time.wait(1000)

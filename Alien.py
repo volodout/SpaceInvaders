@@ -12,7 +12,7 @@ class Alien(pg.sprite.Sprite):
         self.rect.center = [x, y]
         self.count = 0
         self.dir = 18
-        self.delay = 42 - 12 * globals.level
+        self.delay = 42 - 12 * globals.difficult_aliens
 
     def update(self):
         self.count += self.dir // abs(self.dir)

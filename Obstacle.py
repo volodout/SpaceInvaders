@@ -5,7 +5,7 @@ import globals
 class Obstacle(pg.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
-        if globals.level == 0:
+        if globals.difficult_obstacles == 0:
             self.image = pg.image.load("sprites/obstacle_strong.png")
         else:
             self.image = pg.image.load("sprites/obstacle_4.png")
@@ -16,7 +16,7 @@ class Obstacle(pg.sprite.Sprite):
 
     def update(self):
         if pg.sprite.spritecollide(self, bullet_group, True) or pg.sprite.spritecollide(self, alien_bullet_group, True):
-            if globals.level != 0:
+            if globals.difficult_obstacles != 0:
                 self.hp -= 1
                 if self.hp == 0:
                     self.kill()

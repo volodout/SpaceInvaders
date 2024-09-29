@@ -1,6 +1,5 @@
 import pygame as pg
 
-
 screen = pg.display.set_mode((1280, 800))
 clock = pg.time.Clock()
 

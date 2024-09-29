@@ -24,7 +24,7 @@ def create_aliens():
 
 
 def create_obstacles():
-    if globals.level == 2:
+    if globals.difficult_obstacles == 2:
         for i in range(8):
             x = 120 + 150 * i
             y = 700
@@ -77,19 +77,22 @@ def draw_ui():
     print_text('SCORE', 40, 50, 25)
     print_text(str(globals.score), 40, 185, 25, (31, 209, 37))
 
-    f = open('record.txt')
-    bests = list(map(int, f.readlines()))
-    f.close()
-
-    if bests[globals.level] > 0:
-        print_text('BEST', 40, 350, 25, (255, 255, 0))
-        print_text(str(bests[globals.level]), 40, 460, 25, (255, 255, 0))
-
     print_text('LIVES', 40, 800, 25)
 
     for i in range(player.hp):
         image = pg.image.load("sprites/player.png")
         screen.blit(image, (930 + 100 * i, 23))
+
+    if globals.is_creative:
+        return
+
+    f = open('record.txt')
+    bests = list(map(int, f.readlines()))
+    f.close()
+
+    if bests[globals.difficult_aliens] > 0:
+        print_text('BEST', 40, 350, 25, (255, 255, 0))
+        print_text(str(bests[globals.difficult_aliens]), 40, 460, 25, (255, 255, 0))
 
 
 def check_player():
@@ -102,9 +105,9 @@ def check_records():
     bests = list(map(int, f.readlines()))
     f.close()
 
-    current = bests[globals.level]
+    current = bests[globals.difficult_aliens]
     if current < globals.score:
-        bests[globals.level] = globals.score
+        bests[globals.difficult_aliens] = globals.score
 
         f = open('record.txt', 'w')
         for i in range(3):
