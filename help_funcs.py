@@ -1,4 +1,5 @@
 import random
+import json
 
 import game
 import globals
@@ -86,18 +87,43 @@ def draw_ui():
     if globals.is_creative:
         return
 
-    f = open('record.txt')
-    bests = list(map(int, f.readlines()))
-    f.close()
+    board = load_scores('scores.json')
+    note = board[f'{globals.difficult_aliens}'][0]
+    print_text('BEST', 40, 350, 25, (255, 255, 0))
+    print_text(str(note["score"]), 40, 460, 25, (255, 255, 0))
 
-    if bests[globals.difficult_aliens] > 0:
-        print_text('BEST', 40, 350, 25, (255, 255, 0))
-        print_text(str(bests[globals.difficult_aliens]), 40, 460, 25, (255, 255, 0))
 
 
 def check_player():
     if player.isKilled and player.hp == 0:
         game.game_over()
+
+
+def load_scores(file_path):
+    with open(file_path, 'r') as file:
+        return json.load(file)
+
+
+def save_scores(file_path, scores):
+    with open(file_path, 'w') as file:
+        json.dump(scores, file, indent=4)
+
+
+def add_score(scores, level, name, score):
+    scores[level].append({"name": name, "score": score})
+    scores[level] = sorted(scores[level], key=lambda x: x["score"], reverse=True)
+    scores[level] = scores[level][:5]
+
+
+def show_scores(level):
+    scores = load_scores('scores.json')
+    for i, note in enumerate(scores[level]):
+        name = str(note["name"])
+        score = str(note["score"])
+        size = 60
+        print_text(f'{i + 1}.', size, 365, 275 + 90 * i)
+        print_text(name, size, 440, 275 + 90 * i)
+        print_text(score, size, 785, 275 + 90 * i)
 
 
 def check_records():

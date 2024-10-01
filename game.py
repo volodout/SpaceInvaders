@@ -1,3 +1,4 @@
+import help_funcs
 from help_funcs import *
 import globals
 
@@ -77,7 +78,15 @@ def menu(testing=False):
                 pg.quit()
                 quit()
             elif event.type == pg.KEYDOWN:
-                if event.key == pg.K_RETURN:
+                if event.key == pg.K_q:
+                    quit()
+                elif event.key == pg.K_c:
+                    globals.is_creative = True
+                    create_level()
+                elif event.key == pg.K_l:
+                    leaderboard()
+
+                elif event.key == pg.K_RETURN:
                     begin()
                 elif event.key == pg.K_UP:
                     globals.difficult_aliens = max(0, globals.difficult_aliens - 1)
@@ -85,9 +94,7 @@ def menu(testing=False):
                 elif event.key == pg.K_DOWN:
                     globals.difficult_aliens = min(2, globals.difficult_aliens + 1)
                     globals.difficult_obstacles = min(2, globals.difficult_obstacles + 1)
-                elif event.key == pg.K_c:
-                    globals.is_creative = True
-                    create_level()
+
                 colors = ['white', 'white', 'white']
                 colors[globals.difficult_aliens] = 'green'
 
@@ -99,7 +106,9 @@ def menu(testing=False):
         print_text_to_center('MEDIUM', 80, 450, colors[1])
         print_text_to_center('HARD', 80, 550, colors[2])
 
-        print_text_to_center('PRESS C TO CREATE YOUR LEVEL', 60, 700, 'white')
+        print_text('C - create level', 30, 35, 650)
+        print_text('L - leaderboard', 30, 35, 690)
+        print_text('Q - quit', 30, 35, 730)
 
         pg.display.update()
         clock.tick(60)
@@ -108,7 +117,42 @@ def menu(testing=False):
             show = False
 
 
-def create_level():
+def leaderboard():
+    colors = ['white', 'white', 'white']
+    levels = ['EASY', 'MEDIUM', 'HARD']
+    level = 0
+    colors[level] = 'green'
+
+    show = True
+    while show:
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                pg.quit()
+                quit()
+            elif event.type == pg.KEYDOWN:
+                if event.key == pg.K_ESCAPE:
+                    menu()
+
+                elif event.key == pg.K_LEFT:
+                    level = max(0, level - 1)
+                elif event.key == pg.K_RIGHT:
+                    level = min(2, level + 1)
+
+                colors = ['white', 'white', 'white']
+                colors[level] = 'green'
+
+        screen.fill('black')
+
+        print_text_to_center('LEADERBOARD', 100, 80, 'yellow')
+        print_text(f'LEVEL: {'<' if level > 0 else ' '} {levels[level]} {'>' if level < 2 else ' '}', 60, 410, 150)
+        pg.draw.rect(screen, 'white', (340, 250, 600, 500), 5)
+        show_scores(str(level))
+
+        pg.display.update()
+        clock.tick(60)
+
+
+def create_level(testing=False):
     colors = ['white', 'white', 'white', 'white']
     stage = 0
     colors[stage] = 'green'
@@ -122,8 +166,10 @@ def create_level():
             elif event.type == pg.KEYDOWN:
                 if event.key == pg.K_RETURN:
                     begin()
+                elif event.key == pg.K_ESCAPE:
+                    menu()
 
-                if event.key == pg.K_UP:
+                elif event.key == pg.K_UP:
                     stage = max(0, stage - 1)
                 elif event.key == pg.K_DOWN:
                     stage = min(len(colors) - 1, stage + 1)
@@ -163,6 +209,9 @@ def create_level():
         pg.display.update()
         clock.tick(60)
 
+        if testing:
+            show = False
+
 
 def game_over(testing=False):
     globals.player.image = pg.image.load("sprites/player_death.png")
@@ -175,6 +224,7 @@ def game_over(testing=False):
 
     if not globals.is_creative:
         check_records()
+
     globals.score = 0
 
     show = True
