@@ -1,4 +1,8 @@
+from pygame.examples.cursors import image_name
+from pygame.examples.midi import input_main
+
 import help_funcs
+from globals import difficult_aliens
 from help_funcs import *
 import globals
 
@@ -222,10 +226,7 @@ def game_over(testing=False):
     alien_group.empty()
     bullet_group.empty()
 
-    if not globals.is_creative:
-        check_records()
-
-    globals.score = 0
+    input_name = ''
 
     show = True
     while show:
@@ -235,12 +236,31 @@ def game_over(testing=False):
                 quit()
             elif event.type == pg.KEYDOWN:
                 if event.key == pg.K_RETURN:
+
+                    if not globals.is_creative:
+                        scores = load_scores('scores.json')
+                        add_score(scores, str(globals.difficult_aliens), input_name, globals.score)
+                        save_scores('scores.json', scores)
+
+                    globals.score = 0
                     globals.bullets_count = 1
                     globals.is_creative = False
                     menu()
+                elif event.key == pg.K_BACKSPACE:
+                    input_name = input_name[:-1]
+                else:
+                    if len(input_name) < 9:
+                        input_name += event.unicode
 
         print_text_to_center('GAME OVER', 120, 300)
-        print_text_to_center('PRESS ENTER TO EXIT IN MENU', 60, 450)
+
+        if not globals.is_creative:
+            print_text_to_center('PRINT YOUR NAME AND PRESS ENTER', 60, 450)
+            pg.draw.rect(screen, 'black', (200, 500, 800, 40))
+            print_text_to_center(input_name, 60, 520, back=True)
+        else:
+            print_text_to_center('PRESS ENTER TO EXIT IN MENU', 60, 450)
+
 
         pg.display.update()
         clock.tick(60)

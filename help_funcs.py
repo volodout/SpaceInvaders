@@ -93,7 +93,6 @@ def draw_ui():
     print_text(str(note["score"]), 40, 460, 25, (255, 255, 0))
 
 
-
 def check_player():
     if player.isKilled and player.hp == 0:
         game.game_over()
@@ -124,21 +123,6 @@ def show_scores(level):
         print_text(f'{i + 1}.', size, 365, 275 + 90 * i)
         print_text(name, size, 440, 275 + 90 * i)
         print_text(score, size, 785, 275 + 90 * i)
-
-
-def check_records():
-    f = open('record.txt')
-    bests = list(map(int, f.readlines()))
-    f.close()
-
-    current = bests[globals.difficult_aliens]
-    if current < globals.score:
-        bests[globals.difficult_aliens] = globals.score
-
-        f = open('record.txt', 'w')
-        for i in range(3):
-            f.write(str(bests[i]) + '\n')
-        f.close()
 
 
 def update_and_draw_groups():
